@@ -1,33 +1,63 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.express as px
+import os
+from datetime import datetime
 
-# Cargar CSV
-df = pd.read_csv("output.csv")  # Asegurate que el archivo esté en la misma carpeta
+# Cargar el archivo CSV
+csv_path = "output.csv"
+df = pd.read_csv(csv_path)
 
-# Convertir columna de fechas si es necesario
+# Convertir fechas si existen
 if "Date" in df.columns:
     df["Date"] = pd.to_datetime(df["Date"], format="%d/%m/%Y", errors="coerce")
 
 # Ordenar por Rank descendente
 df_sorted = df.sort_values(by="Rank", ascending=False)
 
-# Mostrar tabla
-st.title("Ranking de Jugadores desde CSV")
-st.dataframe(df_sorted)
+# Título principal
+st.title("Ranking de Jugadores CHIFRIJO RAIDERS")
 
-# Gráfico tipo ranking
+# ✅ Mostrar tabla solo si se activa el botón
+if st.toggle("Mostrar tabla de datos"):
+    st.dataframe(df_sorted)
+
+# Gráfico
 st.subheader("Visualización del Ranking")
-colores = ['purple' if rank > 2500 else 'red' for rank in df_sorted["Rank"]]
+df_sorted["Color"] = df_sorted["Rank"].apply(lambda x: "purple" if x > 2500 else "red")
 
-fig, ax = plt.subplots(figsize=(10, 6))
-bars = ax.barh(df_sorted["Nombre"], df_sorted["Rank"], color=colores)
-ax.invert_yaxis()
-ax.set_xlabel("Rank")
-ax.set_title("Ranking de Jugadores")
+fig = px.bar(
+    df_sorted,
+    x="Rank",
+    y="Nombre",
+    orientation="h",
+    color="Color",
+    color_discrete_map={"purple": "purple", "red": "red"},
+    text="Rank",
+    title="Ranking de Jugadores"
+)
 
-for bar in bars:
-    width = bar.get_width()
-    ax.text(width + 20, bar.get_y() + bar.get_height()/2, f"{width:.1f}", va='center')
+# ✅ Aumentar el tamaño del texto en la gráfica
+fig.update_traces(
+    textposition='outside',
+    textfont=dict(size=14, color="black")
+)
 
-st.pyplot(fig)
+fig.update_layout(
+    yaxis=dict(autorange="reversed"),
+    showlegend=False,
+    height=600
+)
+
+st.plotly_chart(fig, use_container_width=True)
+
+# Mostrar fecha de última actualización
+last_updated = datetime.fromtimestamp(os.path.getmtime(csv_path)).strftime("%d/%m/%Y %H:%M:%S")
+st.markdown(
+    f"""
+    <div style='position: fixed; bottom: 10px; left: 10px; font-size: 12px; color: gray;'>
+        Última actualización del archivo: {last_updated}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
