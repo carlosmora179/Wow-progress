@@ -32,8 +32,9 @@ fig = px.bar(
 )
 
 fig.update_traces(
-    textposition='outside',
-    textfont=dict(size=14, color="black")
+    textposition="inside",
+    insidetextanchor="end",
+    textfont=dict(size=20, color="white")
 )
 
 altura_grafico = len(df_sorted) * 40 + 100
@@ -43,6 +44,24 @@ fig.update_layout(
     yaxis=dict(autorange="reversed"),
     showlegend=False,
     height=altura_grafico
+)
+
+fig.add_shape(
+    type="line",
+    x0=2500, x1=2500,
+    y0=-0.5, y1=len(df_sorted) - 0.5,
+    line=dict(color="gray", width=2, dash="dash"),
+    xref="x", yref="y"
+)
+
+
+fig.add_annotation(
+    x=2500,
+    y=-0.5,
+    text="Umbral 2500",
+    showarrow=False,
+    yshift=-10,
+    font=dict(color="gray")
 )
 
 st.plotly_chart(fig, use_container_width=True)
