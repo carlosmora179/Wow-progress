@@ -36,10 +36,13 @@ fig.update_traces(
     textfont=dict(size=14, color="black")
 )
 
+altura_grafico = len(df_sorted) * 40 + 100
+
+
 fig.update_layout(
     yaxis=dict(autorange="reversed"),
     showlegend=False,
-    height=600
+    height=altura_grafico
 )
 
 st.plotly_chart(fig, use_container_width=True)
